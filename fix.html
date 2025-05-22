@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chemical Element Guessing Game</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f8ff;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 20px;
+      }
+
+      .game-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .info-box {
+        display: flex;
+        gap: 20px;
+      }
+
+      #score-display,
+      #timer-display,
+      #level-display {
+        font-weight: bold;
+      }
+
+      #timer.timer-warning {
+        color: #e74c3c;
+      }
+
+      #progress {
+        font-weight: bold;
+        color: #3498db;
+      }
+
+      /* Level Selection Styles */
+      .level-selection {
+        text-align: center;
+        margin: 30px 0;
+      }
+
+      .level-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin: 20px 0;
+      }
+
+      .level-btn {
+        padding: 15px 25px;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        min-width: 120px;
+      }
+
+      .level-easy {
+        background-color: #27ae60;
+        color: white;
+      }
+
+      .level-medium {
+        background-color: #f39c12;
+        color: white;
+      }
+
+      .level-hard {
+        background-color: #e74c3c;
+        color: white;
+      }
+
+      .level-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      }
+
+      #element-symbol {
+        font-size: 72px;
+        font-weight: bold;
+        text-align: center;
+        margin: 30px 0;
+        padding: 20px;
+        background-color: #3498db;
+        color: white;
+        border-radius: 10px;
+      }
+
+      /* Multiple Choice Styles - 6 options in 2x3 grid */
+      .choices-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin: 20px 0;
+      }
+
+      .choice-btn {
+        padding: 20px 15px;
+        font-size: 18px;
+        font-weight: 500;
+        border: 3px solid #3498db;
+        background-color: white;
+        color: #2c3e50;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .choice-btn:hover {
+        background-color: #3498db;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+      }
+
+      .choice-btn.correct {
+        background-color: #27ae60;
+        border-color: #27ae60;
+        color: white;
+        animation: correctPulse 0.6s ease-out;
+      }
+
+      .choice-btn.incorrect {
+        background-color: #e74c3c;
+        border-color: #e74c3c;
+        color: white;
+        animation: shake 0.5s ease-out;
+      }
+
+      .choice-btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.8;
+      }
+
+      @keyframes correctPulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+      }
+
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+      }
+
+      .btn-primary {
+        padding: 12px 24px;
+        background-color: #2ecc71;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      #feedback {
+        min-height: 25px;
+        margin: 20px 0;
+        text-align: center;
+        font-weight: bold;
+        font-size: 18px;
+        padding: 15px;
+        border-radius: 8px;
+      }
+
+      #controls {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+      }
+
+      button {
+        padding: 10px 15px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        opacity: 0.9;
+      }
+
+      #start-btn {
+        display: block;
+        width: 200px;
+        margin: 30px auto;
+        font-size: 18px;
+        padding: 15px;
+      }
+
+      .correct {
+        color: #27ae60;
+        background-color: #d5f4e6;
+      }
+
+      .incorrect {
+        color: #e74c3c;
+        background-color: #ffeaea;
+      }
+
+      #result {
+        text-align: center;
+        margin: 20px 0;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+      }
+
+      .result-info {
+        font-size: 18px;
+        margin: 20px 0;
+      }
+
+      .result-info p {
+        margin: 10px 0;
+      }
+
+      .game-info-box {
+        margin-top: 30px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        border-left: 5px solid #3498db;
+      }
+
+      .game-info-box h3 {
+        margin-top: 0;
+        color: #2c3e50;
+      }
+
+      .game-info-box ul {
+        padding-left: 20px;
+      }
+
+      .game-info-box li {
+        margin-bottom: 8px;
+      }
+
+      .level-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+      }
+
+      .level-card {
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .level-card h4 {
+        margin: 0 0 10px 0;
+        color: white;
+      }
+
+      .level-card p {
+        margin: 5px 0;
+        color: white;
+        font-size: 14px;
+      }
+
+      .easy-card {
+        background-color: #27ae60;
+      }
+
+      .medium-card {
+        background-color: #f39c12;
+      }
+
+      .hard-card {
+        background-color: #e74c3c;
+      }
+
+      /* Responsive design */
+      @media (max-width: 600px) {
+        .choices-container {
+          grid-template-columns: 1fr;
+        }
+        
+        .choice-btn {
+          font-size: 16px;
+          padding: 15px 10px;
+        }
+        
+        #element-symbol {
+          font-size: 48px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Chemical Element Guessing Game</h1>
+
+      <div class="game-info">
+        <div class="info-box">
+          <div id="score-display">Score: <span id="score">0</span></div>
+          <div id="timer-display">Time: <span id="timer">60</span> seconds</div>
+          <div id="level-display">Level: <span id="current-level">-</span></div>
+        </div>
+        <div id="progress"></div>
+      </div>
+
+      <!-- Level Selection -->
+      <div id="level-selection" class="level-selection">
+        <h2>Choose Your Difficulty Level</h2>
+        
+        <div class="level-info">
+          <div class="level-card easy-card">
+            <h4>EASY</h4>
+            <p>Elements 1-20</p>
+            <p>Basic elements</p>
+          </div>
+          <div class="level-card medium-card">
+            <h4>MEDIUM</h4>
+            <p>Elements 1-54</p>
+            <p>Including transition metals</p>
+          </div>
+          <div class="level-card hard-card">
+            <h4>HARD</h4>
+            <p>All 118 Elements</p>
+            <p>Complete periodic table</p>
+          </div>
+        </div>
+
+        <div class="level-buttons">
+          <button class="level-btn level-easy" onclick="selectLevel('easy')">
+            EASY
+          </button>
+          <button class="level-btn level-medium" onclick="selectLevel('medium')">
+            MEDIUM
+          </button>
+          <button class="level-btn level-hard" onclick="selectLevel('hard')">
+            HARD
+          </button>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn-primary" style="display: none;">Start Game</button>
+
+      <div id="game-content" style="display: none">
+        <div id="question-container">
+          <h2 id="question-text">What is the name of the element with the symbol:</h2>
+          <div id="element-symbol">H</div>
+        </div>
+
+        <div id="choices-container" class="choices-container">
+          <!-- 6 choice buttons will be generated here -->
+        </div>
+
+        <div id="feedback"></div>
+
+        <div id="controls">
+          <button id="hint-btn">Hint (-2 points)</button>
+        </div>
+      </div>
+
+      <div id="result" style="display: none">
+        <h2 id="result-message">Game Over!</h2>
+        <div class="result-info">
+          <p>Level: <span id="final-level">-</span></p>
+          <p>Final Score: <span id="final-score">0</span></p>
+          <p>Questions Answered: <span id="questions-answered">0</span></p>
+          <p>Accuracy: <span id="accuracy">0%</span></p>
+        </div>
+      </div>
+
+      <div class="game-info-box">
+        <h3>Game Instructions:</h3>
+        <ul>
+          <li>Choose your difficulty level first</li>
+          <li>You will see multiple choice questions about chemical elements</li>
+          <li>Click on the correct answer from 6 options</li>
+          <li>You have 60 seconds to answer as many questions as possible</li>
+          <li>Correct answer: +10 points</li>
+          <li>Using hint: -2 points</li>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      // Chemical elements data: [symbol, name] - VERIFIED CORRECT
+      const elements = [
+        ["H", "Hydrogen"], ["He", "Helium"], ["Li", "Lithium"], ["Be", "Beryllium"],
+        ["B", "Boron"], ["C", "Carbon"], ["N", "Nitrogen"], ["O", "Oxygen"],
+        ["F", "Fluorine"], ["Ne", "Neon"], ["Na", "Sodium"], ["Mg", "Magnesium"],
+        ["Al", "Aluminum"], ["Si", "Silicon"], ["P", "Phosphorus"], ["S", "Sulfur"],
+        ["Cl", "Chlorine"], ["Ar", "Argon"], ["K", "Potassium"], ["Ca", "Calcium"],
+        ["Sc", "Scandium"], ["Ti", "Titanium"], ["V", "Vanadium"], ["Cr", "Chromium"],
+        ["Mn", "Manganese"], ["Fe", "Iron"], ["Co", "Cobalt"], ["Ni", "Nickel"],
+        ["Cu", "Copper"], ["Zn", "Zinc"], ["Ga", "Gallium"], ["Ge", "Germanium"],
+        ["As", "Arsenic"], ["Se", "Selenium"], ["Br", "Bromine"], ["Kr", "Krypton"],
+        ["Rb", "Rubidium"], ["Sr", "Strontium"], ["Y", "Yttrium"], ["Zr", "Zirconium"],
+        ["Nb", "Niobium"], ["Mo", "Molybdenum"], ["Tc", "Technetium"], ["Ru", "Ruthenium"],
+        ["Rh", "Rhodium"], ["Pd", "Palladium"], ["Ag", "Silver"], ["Cd", "Cadmium"],
+        ["In", "Indium"], ["Sn", "Tin"], ["Sb", "Antimony"], ["Te", "Tellurium"],
+        ["I", "Iodine"], ["Xe", "Xenon"], ["Cs", "Cesium"], ["Ba", "Barium"],
+        ["La", "Lanthanum"], ["Ce", "Cerium"], ["Pr", "Praseodymium"], ["Nd", "Neodymium"],
+        ["Pm", "Promethium"], ["Sm", "Samarium"], ["Eu", "Europium"], ["Gd", "Gadolinium"],
+        ["Tb", "Terbium"], ["Dy", "Dysprosium"], ["Ho", "Holmium"], ["Er", "Erbium"],
+        ["Tm", "Thulium"], ["Yb", "Ytterbium"], ["Lu", "Lutetium"], ["Hf", "Hafnium"],
+        ["Ta", "Tantalum"], ["W", "Tungsten"], ["Re", "Rhenium"], ["Os", "Osmium"],
+        ["Ir", "Iridium"], ["Pt", "Platinum"], ["Au", "Gold"], ["Hg", "Mercury"],
+        ["Tl", "Thallium"], ["Pb", "Lead"], ["Bi", "Bismuth"], ["Po", "Polonium"],
+        ["At", "Astatine"], ["Rn", "Radon"], ["Fr", "Francium"], ["Ra", "Radium"],
+        ["Ac", "Actinium"], ["Th", "Thorium"], ["Pa", "Protactinium"], ["U", "Uranium"],
+        ["Np", "Neptunium"], ["Pu", "Plutonium"], ["Am", "Americium"], ["Cm", "Curium"],
+        ["Bk", "Berkelium"], ["Cf", "Californium"], ["Es", "Einsteinium"], ["Fm", "Fermium"],
+        ["Md", "Mendelevium"], ["No", "Nobelium"], ["Lr", "Lawrencium"], ["Rf", "Rutherfordium"],
+        ["Db", "Dubnium"], ["Sg", "Seaborgium"], ["Bh", "Bohrium"], ["Hs", "Hassium"],
+        ["Mt", "Meitnerium"], ["Ds", "Darmstadtium"], ["Rg", "Roentgenium"], ["Cn", "Copernicium"],
+        ["Nh", "Nihonium"], ["Fl", "Flerovium"], ["Mc", "Moscovium"], ["Lv", "Livermorium"],
+        ["Ts", "Tennessine"], ["Og", "Oganesson"]
+      ];
+
+      // Game variables
+      let currentElement;
+      let currentChoices = [];
+      let correctAnswer;
+      let score = 0;
+      let correctAnswers = 0;
+      let questionMode = "symbol";
+      let timeLeft = 60;
+      let timer;
+      let isGameActive = false;
+      let questionsAnswered = 0;
+      let currentLevel = "";
+      let levelElements = [];
+
+      // Level configurations
+      const levels = {
+        easy: { range: 20, name: "EASY", color: "#27ae60" },
+        medium: { range: 54, name: "MEDIUM", color: "#f39c12" },
+        hard: { range: 118, name: "HARD", color: "#e74c3c" }
+      };
+
+      // DOM elements
+      const elementSymbolEl = document.getElementById("element-symbol");
+      const questionTextEl = document.getElementById("question-text");
+      const choicesContainer = document.getElementById("choices-container");
+      const hintBtn = document.getElementById("hint-btn");
+      const feedbackEl = document.getElementById("feedback");
+      const scoreEl = document.getElementById("score");
+      const timerEl = document.getElementById("timer");
+      const startBtn = document.getElementById("start-btn");
+      const progressEl = document.getElementById("progress");
+      const currentLevelEl = document.getElementById("current-level");
+
+      // Function to select level
+      function selectLevel(level) {
+        currentLevel = level;
+        levelElements = elements.slice(0, levels[level].range);
+        
+        // Update display
+        currentLevelEl.textContent = levels[level].name;
+        currentLevelEl.style.color = levels[level].color;
+        
+        // Hide level selection, show start button
+        document.getElementById("level-selection").style.display = "none";
+        startBtn.style.display = "block";
+      }
+
+      // Function to select random element from current level
+      function selectRandomElement() {
+        return levelElements[Math.floor(Math.random() * levelElements.length)];
+      }
+
+      // Function to generate 6 wrong choices + 1 correct choice
+      function generateChoices(correctAnswer, isSymbolMode) {
+        const choices = [correctAnswer];
+        const answerIndex = isSymbolMode ? 1 : 0;
+        
+        // Generate 5 wrong answers
+        while (choices.length < 6) {
+          const randomElement = selectRandomElement();
+          const potentialChoice = randomElement[answerIndex];
+          
+          if (!choices.includes(potentialChoice)) {
+            choices.push(potentialChoice);
+          }
+        }
+        
+        // Shuffle the choices
+        for (let i = choices.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [choices[i], choices[j]] = [choices[j], choices[i]];
+        }
+        
+        return choices;
+      }
+
+      // Function to create choice buttons
+      function createChoiceButtons(choices) {
+        choicesContainer.innerHTML = '';
+        
+        choices.forEach((choice, index) => {
+          const button = document.createElement('button');
+          button.className = 'choice-btn';
+          button.textContent = choice;
+          button.onclick = () => checkAnswer(choice);
+          choicesContainer.appendChild(button);
+        });
+      }
+
+      // Function to display the question
+      function showQuestion() {
+        currentElement = selectRandomElement();
+        
+        // Randomly choose between asking for name or symbol
+        questionMode = Math.random() > 0.5 ? "symbol" : "name";
+
+        if (questionMode === "symbol") {
+          // Show symbol, ask for name
+          elementSymbolEl.textContent = currentElement[0];
+          questionTextEl.textContent = "What is the name of the element with the symbol:";
+          correctAnswer = currentElement[1]; // Correct answer is the name
+        } else {
+          // Show name, ask for symbol  
+          elementSymbolEl.textContent = currentElement[1];
+          questionTextEl.textContent = "What is the symbol of the element:";
+          correctAnswer = currentElement[0]; // Correct answer is the symbol
+        }
+
+        // Generate 6 choices
+        currentChoices = generateChoices(correctAnswer, questionMode === "symbol");
+        
+        // Create choice buttons
+        createChoiceButtons(currentChoices);
+
+        // Reset feedback
+        feedbackEl.textContent = "";
+        feedbackEl.className = "";
+
+        // Update progress
+        progressEl.textContent = `Questions: ${questionsAnswered}`;
+      }
+
+      // Function to check answer
+      function checkAnswer(selectedAnswer) {
+        if (!isGameActive) return;
+
+        // Disable all buttons
+        const choiceButtons = choicesContainer.querySelectorAll('.choice-btn');
+        choiceButtons.forEach(btn => {
+          btn.disabled = true;
+          
+          if (btn.textContent === selectedAnswer) {
+            if (selectedAnswer === correctAnswer) {
+              btn.className = "choice-btn correct";
+            } else {
+              btn.className = "choice-btn incorrect";
+            }
+          } else if (btn.textContent === correctAnswer) {
+            // Highlight the correct answer
+            btn.className = "choice-btn correct";
+          }
+        });
+
+        if (selectedAnswer === correctAnswer) {
+          feedbackEl.textContent = "Correct! 🎉";
+          feedbackEl.className = "correct";
+          score += 10;
+          correctAnswers++;
+          scoreEl.textContent = score;
+        } else {
+          feedbackEl.textContent = `Wrong! The correct answer is: ${correctAnswer}`;
+          feedbackEl.className = "incorrect";
+        }
+
+        questionsAnswered++;
+
+        // Show next question after delay
+        setTimeout(() => {
+          showQuestion();
+        }, 2000);
+      }
+
+      // Function to show hint
+      function showHint() {
+        if (!isGameActive) return;
+
+        // Show first letter of correct answer
+        feedbackEl.textContent = `Hint: The answer starts with "${correctAnswer[0]}"`;
+        feedbackEl.className = "";
+
+        // Deduct score for using hint
+        score = Math.max(0, score - 2);
+        scoreEl.textContent = score;
+      }
+
+      // Function to start timer
+      function startTimer() {
+        timer = setInterval(() => {
+          timeLeft--;
+          timerEl.textContent = timeLeft;
+
+          if (timeLeft <= 10) {
+            timerEl.className = "timer-warning";
+          } else {
+            timerEl.className = "";
+          }
+
+          if (timeLeft <= 0) {
+            endGame();
+          }
+        }, 1000);
+      }
+
+      // Function to start game
+      function startGame() {
+        isGameActive = true;
+        score = 0;
+        correctAnswers = 0;
+        timeLeft = 60;
+        questionsAnswered = 0;
+
+        scoreEl.textContent = score;
+        timerEl.textContent = timeLeft;
+        timerEl.className = "";
+
+        // Hide start button, show game content
+        startBtn.style.display = "none";
+        document.getElementById("game-content").style.display = "block";
+
+        // Start timer and show first question
+        startTimer();
+        showQuestion();
+      }
+
+      // Function to end game
+      function endGame() {
+        isGameActive = false;
+        clearInterval(timer);
+
+        // Hide game content
+        document.getElementById("game-content").style.display = "none";
+
+        // Show result
+        const resultEl = document.getElementById("result");
+        resultEl.style.display = "block";
+
+        const accuracy = questionsAnswered > 0 ? Math.round((correctAnswers / questionsAnswered) * 100) : 0;
+
+        document.getElementById("result-message").textContent = "Time's up!";
+        document.getElementById("final-level").textContent = levels[currentLevel].name;
+        document.getElementById("final-score").textContent = score;
+        document.getElementById("questions-answered").textContent = questionsAnswered;
+        document.getElementById("accuracy").textContent = accuracy + "%";
+
+        // Reset for next game
+        document.getElementById("level-selection").style.display = "block";
+        document.getElementById("result").style.display = "none";
+        startBtn.textContent = "Start Game";
+      }
+
+      // Event listeners
+      if (hintBtn) {
+        hintBtn.addEventListener("click", showHint);
+      }
+
+      if (startBtn) {
+        startBtn.addEventListener("click", startGame);
+      }
+    </script>
+  </body>
+</html>
